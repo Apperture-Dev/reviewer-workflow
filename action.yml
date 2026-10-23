@@ -1,5 +1,5 @@
 name: AI Code Review with Conductor
-description: Review pull requests with Claude, GitHub Copilot or any OpenAI-compatible gateway, with inline suggestions and thread follow-up
+description: AI code review for pull requests with Claude, GitHub Copilot or any OpenAI-compatible gateway (BYOK)
 author: Apperture-Dev
 branding:
   icon: eye
@@ -42,7 +42,7 @@ inputs:
 
 runs:
   using: docker
-  image: docker://registry.gitlab.com/apperturedev/reviewer-workflow:1.5.1
+  image: docker://registry.gitlab.com/apperturedev/reviewer-workflow:1.5.2
   env:
     REVIEWER_GITHUB_TOKEN: ${{ inputs.github-token }}
     REVIEWER_PROVIDER: ${{ inputs.provider }}
