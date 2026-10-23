@@ -1,0 +1,55 @@
+name: AI Code Review with Conductor
+description: Review pull requests with Claude, GitHub Copilot or any OpenAI-compatible gateway, with inline suggestions and thread follow-up
+author: Apperture-Dev
+branding:
+  icon: eye
+  color: purple
+
+inputs:
+  provider:
+    description: claude, copilot or gateway
+    default: claude
+  model:
+    description: Model for every agent; empty uses claude-sonnet-5-5 with Claude and the account default with Copilot; required with gateway
+    default: ""
+  gateway-url:
+    description: Base URL of an OpenAI-compatible endpoint (chat/completions) for provider gateway, e.g. https://gateway.example.com/v1
+    default: ""
+  language:
+    description: Language of the comments (en, es, ...)
+    default: en
+  rules-files:
+    description: Comma-separated repository files with project rules the review must enforce
+    default: AGENTS.md,CLAUDE.md,REVIEW.md
+  extra-instructions:
+    description: Extra free-text instructions for the reviewers
+    default: ""
+  exclude-paths:
+    description: Comma-separated glob patterns of files that are not reviewed
+    default: "*.lock,package-lock.json,pnpm-lock.yaml,go.sum,vendor/*,node_modules/*,dist/*,build/*,*.min.js,*.min.css,*.map,*.svg"
+  max-findings:
+    description: Maximum number of published findings (most severe first)
+    default: "20"
+  max-diff-chars:
+    description: Larger diffs are truncated at file boundaries
+    default: "150000"
+  output-dir:
+    description: Where findings.json, the context and the Conductor log are written, relative to the workspace
+    default: reviewer-output
+
+runs:
+  using: docker
+  image: docker://registry.gitlab.com/apperturedev/reviewer-workflow:1.4.0
+  env:
+    # The token is not an input: inputs reach the container as INPUT_* variables, which the agents would see.
+    REVIEWER_GITHUB_TOKEN: ${{ github.token }}
+    REVIEWER_PROVIDER: ${{ inputs.provider }}
+    REVIEWER_MODEL: ${{ inputs.model }}
+    COPILOT_PROVIDER_BASE_URL: ${{ inputs.gateway-url }}
+    REVIEWER_LANGUAGE: ${{ inputs.language }}
+    REVIEWER_RULES_FILES: ${{ inputs.rules-files }}
+    REVIEWER_EXTRA_INSTRUCTIONS: ${{ inputs.extra-instructions }}
+    REVIEWER_EXCLUDE_PATHS: ${{ inputs.exclude-paths }}
+    REVIEWER_MAX_FINDINGS: ${{ inputs.max-findings }}
+    REVIEWER_MAX_DIFF_CHARS: ${{ inputs.max-diff-chars }}
+    REVIEWER_OUTPUT_DIR: ${{ inputs.output-dir }}
