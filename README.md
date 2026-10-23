@@ -113,4 +113,4 @@ The full documentation is in the [project README](https://gitlab.com/apperturede
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/Apperture-Dev/reviewer-workflow/blob/main/LICENSE)
