@@ -6,6 +6,9 @@ branding:
   color: purple
 
 inputs:
+  github-token:
+    description: Token that publishes the comments; it never reaches the AI agents
+    default: ${{ github.token }}
   provider:
     description: claude, copilot or gateway
     default: claude
@@ -39,10 +42,9 @@ inputs:
 
 runs:
   using: docker
-  image: docker://registry.gitlab.com/apperturedev/reviewer-workflow:1.4.0
+  image: docker://registry.gitlab.com/apperturedev/reviewer-workflow:3ac83b7ea7210cc453e3fc85d88684ae0256587a
   env:
-    # The token is not an input: inputs reach the container as INPUT_* variables, which the agents would see.
-    REVIEWER_GITHUB_TOKEN: ${{ github.token }}
+    REVIEWER_GITHUB_TOKEN: ${{ inputs.github-token }}
     REVIEWER_PROVIDER: ${{ inputs.provider }}
     REVIEWER_MODEL: ${{ inputs.model }}
     COPILOT_PROVIDER_BASE_URL: ${{ inputs.gateway-url }}

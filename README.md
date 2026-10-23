@@ -86,6 +86,7 @@ The gateway model must support *tool calling*: the reviewers read the checkout w
 
 | Input | Default | Description |
 |---|---|---|
+| `github-token` | `${{ github.token }}` | Token that publishes the comments; it never reaches the AI agents |
 | `provider` | `claude` | `claude`, `copilot` or `gateway` |
 | `model` | *(empty)* | Model for every agent. Required with `gateway` |
 | `gateway-url` | *(empty)* | Base URL of the OpenAI-compatible endpoint for `gateway` |
