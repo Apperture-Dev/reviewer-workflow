@@ -110,3 +110,7 @@ A line that **starts** with `@reviewer` in the message of any new commit changes
 | `focus <area>…` | Runs only the given reviewers: `correctness`, `security`, `quality` |
 
 The full documentation is in the [project README](https://gitlab.com/apperturedev/reviewer-workflow#readme).
+
+## License
+
+[MIT](LICENSE)
