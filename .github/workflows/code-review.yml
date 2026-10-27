@@ -1,0 +1,103 @@
+# AI code review of pull requests, called from the reviewed repository:
+#   jobs:
+#     code-review:
+#       uses: Apperture-Dev/reviewer-workflow/.github/workflows/code-review.yml@v1
+#       secrets:
+#         CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+# The caller sets the pull_request trigger and the permissions: a called workflow can only lower them.
+name: code-review
+
+on:
+  workflow_call:
+    # Same names and defaults as the Action's inputs: an input passed empty would override its default.
+    inputs:
+      provider:
+        description: claude, copilot or gateway
+        type: string
+        default: claude
+      model:
+        description: Model for every agent; empty uses claude-sonnet-5-5 with Claude and the account default with Copilot; required with gateway
+        type: string
+        default: ""
+      gateway-url:
+        description: Base URL of an OpenAI-compatible endpoint (chat/completions) for provider gateway, e.g. https://gateway.example.com/v1
+        type: string
+        default: ""
+      language:
+        description: Language of the comments (en, es, ...)
+        type: string
+        default: en
+      rules-files:
+        description: Comma-separated repository files with project rules the review must enforce
+        type: string
+        default: AGENTS.md,CLAUDE.md,REVIEW.md
+      extra-instructions:
+        description: Extra free-text instructions for the reviewers
+        type: string
+        default: ""
+      exclude-paths:
+        description: Comma-separated glob patterns of files that are not reviewed
+        type: string
+        default: "*.lock,package-lock.json,pnpm-lock.yaml,go.sum,vendor/*,node_modules/*,dist/*,build/*,*.min.js,*.min.css,*.map,*.svg"
+      max-findings:
+        description: Maximum number of published findings (most severe first)
+        type: string
+        default: "20"
+      max-diff-chars:
+        description: Larger diffs are truncated at file boundaries
+        type: string
+        default: "150000"
+      output-dir:
+        description: Where findings.json, the context and the Conductor log are written, relative to the workspace
+        type: string
+        default: reviewer-output
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN:
+        required: false
+      ANTHROPIC_API_KEY:
+        required: false
+      COPILOT_GITHUB_TOKEN:
+        required: false
+      COPILOT_PROVIDER_API_KEY:
+        required: false
+
+jobs:
+  code-review:
+    # Pull requests from forks get no secrets and a read-only token; drafts wait until ready.
+    if: ${{ !github.event.pull_request.draft && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    # The review informs; it never blocks a pull request.
+    continue-on-error: true
+    timeout-minutes: 30
+    concurrency:
+      group: code-review-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      # Without persist-credentials: false the token stays in .git/config, readable by the agents.
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      # The release job pins this to the same version as the workflow.
+      - uses: Apperture-Dev/reviewer-workflow@v1.6.0
+        with:
+          provider: ${{ inputs.provider }}
+          model: ${{ inputs.model }}
+          gateway-url: ${{ inputs.gateway-url }}
+          language: ${{ inputs.language }}
+          rules-files: ${{ inputs.rules-files }}
+          extra-instructions: ${{ inputs.extra-instructions }}
+          exclude-paths: ${{ inputs.exclude-paths }}
+          max-findings: ${{ inputs.max-findings }}
+          max-diff-chars: ${{ inputs.max-diff-chars }}
+          output-dir: ${{ inputs.output-dir }}
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+          COPILOT_PROVIDER_API_KEY: ${{ secrets.COPILOT_PROVIDER_API_KEY }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reviewer-output
+          path: ${{ inputs.output-dir }}/
+          retention-days: 7
