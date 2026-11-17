@@ -36,6 +36,9 @@ inputs:
   review-depth:
     description: "deep: reviewers must open the changed files and their callers, and the rest of the merge request is listed for them to read; quick: review from the diff, with the rest of the merge request as context diff"
     default: deep
+  review-timeout-minutes:
+    description: Minutes the review may take; each reviewer gets 3/5 of the workflow time, so a slow one fails alone and the rest is published. Keep the job timeout at least as long
+    default: "30"
   max-findings:
     description: Maximum number of published findings (most severe first)
     default: "20"
@@ -48,7 +51,7 @@ inputs:
 
 runs:
   using: docker
-  image: docker://registry.gitlab.com/apperturedev/reviewer-workflow:1.8.1
+  image: docker://registry.gitlab.com/apperturedev/reviewer-workflow:1.8.2
   env:
     REVIEWER_GITHUB_TOKEN: ${{ inputs.github-token }}
     REVIEWER_PROVIDER: ${{ inputs.provider }}
@@ -60,6 +63,7 @@ runs:
     REVIEWER_EXCLUDE_PATHS: ${{ inputs.exclude-paths }}
     REVIEWER_EXTRA_EXCLUDE_PATHS: ${{ inputs.extra-exclude-paths }}
     REVIEWER_REVIEW_DEPTH: ${{ inputs.review-depth }}
+    REVIEWER_TIMEOUT_MINUTES: ${{ inputs.review-timeout-minutes }}
     REVIEWER_MAX_FINDINGS: ${{ inputs.max-findings }}
     REVIEWER_MAX_DIFF_CHARS: ${{ inputs.max-diff-chars }}
     REVIEWER_OUTPUT_DIR: ${{ inputs.output-dir }}

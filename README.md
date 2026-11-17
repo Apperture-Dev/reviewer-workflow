@@ -84,6 +84,7 @@ The reusable workflow and the Action take the same inputs, except `github-token`
 | `exclude-paths` | lockfiles, `vendor/*`, `dist/*`, minified files… | Comma-separated globs that are not reviewed |
 | `extra-exclude-paths` | *(empty)* | Globs excluded on top of `exclude-paths`, so adding one does not mean copying the defaults |
 | `review-depth` | `deep` | `deep`: the reviewers must open the files under review and the callers of the changed code, and the rest of the merge request is listed for them to read; `quick`: review from the diff, with the rest of the merge request as context diff |
+| `review-timeout-minutes` | `30` | Minutes the review may take. Conductor stops at 5/6 of it and each reviewer gets 3/5 of that (900 s with the default): a reviewer that runs out fails alone, the others are verified and published, and the summary says which areas are missing and how to review them with `@reviewer full focus`. The reusable workflow uses it as the job timeout; with the Action as a step, keep `timeout-minutes` at least this long |
 | `max-findings` | `20` | Maximum number of published findings (most severe first) |
 | `max-diff-chars` | `150000` | Larger diffs are truncated at file boundaries and the review says so |
 | `output-dir` | `reviewer-output` | Where `findings.json`, the context and the Conductor log are written |
