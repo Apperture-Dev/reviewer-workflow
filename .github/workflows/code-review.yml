@@ -48,7 +48,7 @@ on:
         type: string
         default: deep
       review-timeout-minutes:
-        description: Minutes the review may take; each reviewer gets 3/5 of the workflow time, so a slow one fails alone and the rest is published. Keep the job timeout at least as long
+        description: Minutes the review may take; each reviewer gets 3/5 of the workflow time and the verifier the rest, so a slow reviewer fails alone and a slow verifier leaves the findings published unverified. Keep the job timeout at least as long
         type: string
         default: "30"
       max-findings:
@@ -91,7 +91,7 @@ jobs:
         with:
           persist-credentials: false
       # The release job pins this to the same version as the workflow.
-      - uses: Apperture-Dev/reviewer-workflow@v1.8.2
+      - uses: Apperture-Dev/reviewer-workflow@v1.8.3
         with:
           provider: ${{ inputs.provider }}
           model: ${{ inputs.model }}
